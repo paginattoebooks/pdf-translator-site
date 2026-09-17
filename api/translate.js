@@ -27,7 +27,7 @@ async function requestTranslation(url) {
 }
 
 async function requestBackupTranslation(text, targetLanguage) {
-  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=auto|${encodeURIComponent(targetLanguage)}`
+  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${encodeURIComponent(targetLanguage)}`
   const response = await fetch(url)
   if (!response.ok) {
     throw new Error(`backup translation provider returned HTTP ${response.status}`)
@@ -35,7 +35,7 @@ async function requestBackupTranslation(text, targetLanguage) {
 
   const data = await response.json()
   const translatedText = data?.responseData?.translatedText || ''
-  if (!translatedText || data?.responseStatus !== 200) {
+  if (!translatedText || Number(data?.responseStatus) !== 200) {
     throw new Error('backup translation provider returned no translation')
   }
 
