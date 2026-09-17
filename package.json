@@ -1,0 +1,26 @@
+{
+  "name": "pdf-translator-site",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"node server.js\" \"vite --host 0.0.0.0\"",
+    "server": "node server.js",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^4.22.3",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^4.3.136",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tesseract.js": "^7.0.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.2",
+    "concurrently": "^9.2.4",
+    "vite": "^5.4.8"
+  }
+}
