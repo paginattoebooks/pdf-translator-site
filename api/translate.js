@@ -26,6 +26,22 @@ async function requestTranslation(url) {
   throw lastError || new Error('translation provider unavailable')
 }
 
+async function requestBackupTranslation(text, targetLanguage) {
+  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=auto|${encodeURIComponent(targetLanguage)}`
+  const response = await fetch(url)
+  if (!response.ok) {
+    throw new Error(`backup translation provider returned HTTP ${response.status}`)
+  }
+
+  const data = await response.json()
+  const translatedText = data?.responseData?.translatedText || ''
+  if (!translatedText || data?.responseStatus !== 200) {
+    throw new Error('backup translation provider returned no translation')
+  }
+
+  return translatedText
+}
+
 export default async function handler(request, response) {
   response.setHeader('Access-Control-Allow-Origin', '*')
   response.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
@@ -46,9 +62,16 @@ export default async function handler(request, response) {
 
   try {
     const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(targetLanguage)}&dt=t&ie=UTF-8&oe=UTF-8&q=${encodeURIComponent(text)}`
-    const upstream = await requestTranslation(url)
-    const data = await upstream.json()
-    const translatedText = data?.[0]?.map((item) => item?.[0] || '').join('') || ''
+    let translatedText = ''
+
+    try {
+      const upstream = await requestTranslation(url)
+      const data = await upstream.json()
+      translatedText = data?.[0]?.map((item) => item?.[0] || '').join('') || ''
+    } catch (primaryError) {
+      console.warn('Primary translation provider failed:', primaryError.message)
+      translatedText = await requestBackupTranslation(text, targetLanguage)
+    }
 
     return response.status(200).json({ translatedText })
   } catch (error) {
